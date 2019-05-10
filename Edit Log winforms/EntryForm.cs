@@ -14,9 +14,12 @@ namespace Edit_Log_winforms
     public partial class EntryForm : Form
     {
         Video vid;
-        public EntryForm(Video vidSend)
+        List<Video> vids;
+
+        public EntryForm(Form1 form)
         {
-            vid = vidSend;
+            vid = form.Vid;
+            vids = form.Vids;
             InitializeComponent();
             label1.Text = "Editing date";
             label2.Text = "Video Name";
@@ -37,6 +40,7 @@ namespace Edit_Log_winforms
                               textBox1.Text + " " + 
                               textBox2.Text + " " +
                               textBox3.Text;
+            vid.Entries.Add(Entry.NewEntryInForm(newEntry));
             try
             {
                 File.AppendAllText(Program.editLogLocation, Environment.NewLine + newEntry);

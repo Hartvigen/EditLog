@@ -41,7 +41,7 @@ namespace Edit_Log_winforms
         public DateTime Date { get => _date; set => _date = value; }
         public Boolean Done { get => _done; set => _done = value; }
 
-        public static List<Entry> readEntries()
+        public static List<Entry> ReadEntries()
         {
             List<Entry> Entries = new List<Entry>();
             string[] lines = System.IO.File.ReadAllLines(Program.editLogLocation);
@@ -102,6 +102,36 @@ namespace Edit_Log_winforms
                 prevName = name;
             }
             return Entries;
+        }
+
+        //Fix this immense amount of boiler plate code
+        public static Entry NewEntryInForm(string line)
+        {
+            string[] entryInfo = line.Split(' ');
+            DateTime date = DateTime.Parse(entryInfo[0]);
+            string name = entryInfo[1];
+            Boolean done = false;
+
+            try
+            {
+                if (entryInfo[4].Equals("done"))
+                {
+                    done = true;
+                }
+            }
+            catch (IndexOutOfRangeException e) { }
+
+            //concatanates the entries containing info about the time spent
+            int[] time = TimesToInt(entryInfo[2].Split(':').Concat(entryInfo[3].Split(':')).ToArray(), line, 4);
+
+
+            //multiply minute counters by 60 to get a second value
+            int startTime = time[0] * 60 + time[1];
+            int endTime = time[2] * 60 + time[3];
+
+            int total = Math.Abs(startTime - endTime);
+
+            return(new Entry(name, startTime, endTime, total, date, done));
         }
 
         public static int[] TimesToInt(string[] times, string line, int size)

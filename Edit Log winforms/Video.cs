@@ -60,9 +60,8 @@ namespace Edit_Log_winforms
                 }
                 videos.Add(new Video(vidName, EntriesWithName, total, done));
             }
-
             return videos;
-
         }
+
     }
 }
