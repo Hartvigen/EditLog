@@ -30,10 +30,16 @@ namespace Edit_Log_winforms
             InitializeComponent();
             comboBox1.DataSource = Vids;
             comboBox1.DisplayMember = "Name";
+
             label1.Text = "Total Time";
             label2.Text = "Average Time";
+            label3.Text = "Cannot create a graph with only one entry";
+            label3.Font = new Font("Verdana", 20, FontStyle.Bold);
+            label3.Visible = false;
+
             button1.Text = "New Entry";
             button2.Text = "Choose Log";
+
             textBox1.ReadOnly = true;
             textBox2.ReadOnly = true;
             textBox3.ReadOnly = true;
@@ -51,6 +57,7 @@ namespace Edit_Log_winforms
         {
             var formPopup = new EntryForm(this);
             formPopup.ShowDialog();
+            comboBox1.DataSource = formPopup.Vids;
             setChartData();
         }
 
@@ -80,39 +87,52 @@ namespace Edit_Log_winforms
         public void setChartData()
         {
             vid = comboBox1.SelectedItem as Video;
-
-            var s = new Series();
-            s.ChartType = SeriesChartType.Line;
-            s.Name = "Editing time";
-            foreach (Entry entry in vid.Entries)
+            if (vid.Entries.Count != 1)
             {
-                s.Points.AddXY(entry.Date, entry.TotalTime);
+                int highestTotal = 0;
+                label3.Visible = false;
+                var s = new Series();
+                s.ChartType = SeriesChartType.Line;
+                s.Name = "Editing time";
+                foreach (Entry entry in vid.Entries)
+                {
+                    if (entry.TotalTime > highestTotal)
+                        highestTotal = entry.TotalTime;
+                    s.Points.AddXY(entry.Date, entry.TotalTime);
+                }
+
+                chart1.Series.Clear();
+                chart1.Series.Add(s);
+                chart1.Update();
+
+                chart1.Series[0].XValueType = ChartValueType.DateTime;
+                chart1.ChartAreas[0].AxisX.LabelStyle.Format = "MM-dd";
+                chart1.ChartAreas[0].AxisX.Interval = 1;
+                chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Days;
+                chart1.ChartAreas[0].AxisX.IntervalOffset = 1;
+
+                chart1.Series[0].XValueType = ChartValueType.DateTime;
+                DateTime minDate = vid.Entries[0].Date;
+                DateTime maxDate = vid.Entries[vid.Entries.Count - 1].Date.AddSeconds(-1);  // or DateTime.Now;
+                chart1.ChartAreas[0].AxisX.Minimum = minDate.ToOADate();
+                chart1.ChartAreas[0].AxisX.Maximum = maxDate.ToOADate();
+
+
+                int tot = vid.Total % 60;
+                double avg = vid.Average / 60;
+                double avgSeconds = vid.Average % 60;
+
+                textBox1.Text = vid.Total / 60 + ":" + tot.ToString("00");
+                if (avg >= 1)
+                    textBox2.Text = avg.ToString() + ":" + avgSeconds.ToString();
+                else
+                    textBox2.Text = vid.Average.ToString("00");
             }
-
-            chart1.Series.Clear();
-            chart1.Series.Add(s);
-
-            chart1.Series[0].XValueType = ChartValueType.DateTime;
-            chart1.ChartAreas[0].AxisX.LabelStyle.Format = "MM-dd";
-            chart1.ChartAreas[0].AxisX.Interval = 1;
-            chart1.ChartAreas[0].AxisX.IntervalType = DateTimeIntervalType.Days;
-            chart1.ChartAreas[0].AxisX.IntervalOffset = 1;
-
-            chart1.Series[0].XValueType = ChartValueType.DateTime;
-            DateTime minDate = vid.Entries[0].Date;
-            DateTime maxDate = vid.Entries[vid.Entries.Count - 1].Date.AddSeconds(-1);  // or DateTime.Now;
-            chart1.ChartAreas[0].AxisX.Minimum = minDate.ToOADate();
-            chart1.ChartAreas[0].AxisX.Maximum = maxDate.ToOADate();
-
-            int tot = vid.Total % 60;
-            double avg = vid.Average / 60;
-            double avgSeconds = vid.Average % 60;
-
-            textBox1.Text = vid.Total / 60 + ":" + tot.ToString("00");
-            if (avg >= 1)
-                textBox2.Text = avg.ToString() + ":" + avgSeconds.ToString();
             else
-                textBox2.Text = vid.Average.ToString("00");
+            {
+                chart1.Series.Clear();
+                label3.Visible = true;
+            }
         }
     }
 }

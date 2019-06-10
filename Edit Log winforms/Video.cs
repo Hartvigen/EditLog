@@ -23,6 +23,18 @@ namespace Edit_Log_winforms
             _average = total / entries.Count;
         }
 
+        public Video(Entry entry)
+        {
+            List<Entry> ent = new List<Entry>();
+            ent.Add(entry);
+
+            _name = entry.Name;
+            _entries = ent;
+            _total = entry.TotalTime;
+            _done = entry.Done;
+            _average = entry.TotalTime;
+        }
+
         public string Name { get => _name; set => _name = value; }
         public int Total { get => _total; set => _total = value; }
         public bool Done { get => _done; set => _done = value; }
