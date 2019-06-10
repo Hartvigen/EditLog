@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,7 +56,7 @@ namespace Edit_Log_winforms
                 if (line == "")
                     break;
                 string[] entryInfo = line.Split(' ');
-                DateTime date = DateTime.Parse(entryInfo[0]);
+                DateTime date = DateTime.ParseExact(entryInfo[0], "MM/dd/yyyy", CultureInfo.InvariantCulture);
                 string name = entryInfo[1];
                 Boolean done = false;
 
